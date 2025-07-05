@@ -12,6 +12,7 @@ import (
 
 func compactJson(j []byte) (string, error) {
 	var buf bytes.Buffer
+
 	if err := json.Compact(&buf, j); err != nil {
 		return "", err
 	}
@@ -141,6 +142,38 @@ func TestCreateCheckpointNoData(t *testing.T) {
 	expected, err := compactJson([]byte(e))
 	if err != nil {
 		fmt.Println("Unable to compact json:", err)
+
+		t.FailNow()
+	}
+
+	if expected != string(j) {
+		fmt.Println("Expected:\t", expected)
+		fmt.Println("Got:\t", string(j))
+
+		t.FailNow()
+	}
+}
+
+func TestCreateClose(t *testing.T) {
+	msg := message.NewClose()
+
+	j, err := json.Marshal(msg)
+	if err != nil {
+		fmt.Println(err)
+
+		t.FailNow()
+	}
+
+	e := `
+	{
+		"type": "close",
+		"data": null
+	}
+	`
+
+	expected, err := compactJson([]byte(e))
+	if err != nil {
+		fmt.Println(err)
 
 		t.FailNow()
 	}

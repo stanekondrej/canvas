@@ -29,3 +29,10 @@ func NewError(e string) Message {
 		Data:        errorMessage(e),
 	}
 }
+
+func NewClose() Message {
+	return Message{
+		MessageType: "close",
+		Data:        nil,
+	}
+}

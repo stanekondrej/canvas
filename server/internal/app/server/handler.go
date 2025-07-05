@@ -56,6 +56,11 @@ func (h *handler) Handle(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if msg.MessageType == "close" {
+			conn.WriteJSON(message.NewClose())
+			break
+		}
+
 		// FIXME: this is so, so stupid
 		j, _ := json.Marshal(msg)
 		var incoming struct {
