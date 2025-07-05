@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 	"github.com/stanekondrej/canvas/server/internal/app/server/canvas"
@@ -11,12 +13,14 @@ import (
 )
 
 type handler struct {
-	canvas canvas.Canvas
+	canvas   canvas.Canvas
+	upgrader websocket.Upgrader
 }
 
 func NewHandler() handler {
 	return handler{
-		canvas: canvas.NewCanvas(),
+		canvas:   canvas.NewCanvas(),
+		upgrader: getUpgrader(),
 	}
 }
 
@@ -24,10 +28,30 @@ func (h *handler) getCanvas() *canvas.Canvas {
 	return &h.canvas
 }
 
-var upgrader websocket.Upgrader
+func getUpgrader() websocket.Upgrader {
+	debugEnv, ok := os.LookupEnv("CANVAS_DEBUG")
+	if !ok {
+		return websocket.Upgrader{}
+	}
+
+	debug, err := strconv.ParseBool(debugEnv)
+	if err != nil {
+		return websocket.Upgrader{}
+	}
+
+	if !debug {
+		return websocket.Upgrader{}
+	}
+
+	return websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+}
 
 func (h *handler) Handle(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
