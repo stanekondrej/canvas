@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/stanekondrej/canvas/server/internal/app/server/canvas"
 	"github.com/stanekondrej/canvas/server/internal/app/server/message"
 )
+
+const CHECKPOINT_INTERVAL time.Duration = time.Second * 10
 
 type handler struct {
 	canvas   canvas.Canvas
@@ -58,11 +61,17 @@ func (h *handler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send the current state of the canvas
-	cp := message.NewCheckpoint(h.canvas.CurrentState())
-	if err := conn.WriteJSON(cp); err != nil {
-		log.Println(err)
-		return
-	}
+	go func() {
+		for {
+			cp := message.NewCheckpoint(h.canvas.CurrentState())
+			if err := conn.WriteJSON(cp); err != nil {
+				log.Println(err)
+				continue
+			}
+
+			time.Sleep(CHECKPOINT_INTERVAL)
+		}
+	}()
 
 	// register interest in canvas updates
 	h.getCanvas().RegisterObserver(func(s canvas.Stroke) {
