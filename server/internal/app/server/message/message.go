@@ -4,35 +4,36 @@ import "github.com/stanekondrej/canvas/server/internal/app/server/canvas"
 
 type errorMessage string
 
-type Message struct {
-	MessageType string `json:"type"`
-	Data        any    `json:"data"`
+type MessageType string
+
+const (
+	UpdateMessage     MessageType = "update"
+	CheckpointMessage MessageType = "checkpoint"
+	ErrorMessage      MessageType = "error"
+)
+
+type Message[T errorMessage | []canvas.Stroke | canvas.Stroke] struct {
+	Type MessageType `json:"type"`
+	Data T           `json:"data"`
 }
 
-func NewUpdate(s canvas.Stroke) Message {
-	return Message{
-		MessageType: "update",
-		Data:        s,
+func NewUpdate(s canvas.Stroke) Message[canvas.Stroke] {
+	return Message[canvas.Stroke]{
+		Type: "update",
+		Data: s,
 	}
 }
 
-func NewCheckpoint(c []canvas.Stroke) Message {
-	return Message{
-		MessageType: "checkpoint",
-		Data:        c,
+func NewCheckpoint(c []canvas.Stroke) Message[[]canvas.Stroke] {
+	return Message[[]canvas.Stroke]{
+		Type: "checkpoint",
+		Data: c,
 	}
 }
 
-func NewError(e string) Message {
-	return Message{
-		MessageType: "error",
-		Data:        errorMessage(e),
-	}
-}
-
-func NewClose() Message {
-	return Message{
-		MessageType: "close",
-		Data:        nil,
+func NewError(e string) Message[errorMessage] {
+	return Message[errorMessage]{
+		Type: "error",
+		Data: errorMessage(e),
 	}
 }
