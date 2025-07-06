@@ -1,118 +1,49 @@
 import { useEffect } from "preact/hooks";
-import { Sha256 } from "@aws-crypto/sha256-browser";
-
-type Message =
-  | {
-      type: "update";
-      data: Stroke;
-    }
-  | {
-      type: "checkpoint";
-      data: Stroke[];
-    }
-  | {
-      type: "close";
-      data: null;
-    }
-  | {
-      type: "error";
-      data: string;
-    };
-
-type Coordinate = {
-  x: number;
-  y: number;
-};
-type Stroke = Coordinate[];
-
-let state: Stroke[] = [];
-
-const SERVER_URL = "ws://localhost:9999";
-
-const computeHash = async (x: string): Promise<string> => {
-  let hash = new Sha256();
-  hash.update(x);
-  return (await hash.digest()).toString();
-};
+import type { Stroke, Message } from "./worker.ts";
+import ServerWorker from "./worker?worker";
 
 /**
  * Call this from a context where the canvas element has been initialized!
  */
 const draw = (s: Stroke, ctx: CanvasRenderingContext2D) => {
-  throw new Error("TBI");
+  if (s.length < 2) {
+    console.warn(`Invalid stroke ${s}; less than two points`);
+  }
+
+  for (let i = 0; i < s.length - 1; ++i) {
+    const c1 = s[i];
+    const c2 = s[i + 1];
+  }
+};
+
+const messageHandler = (msg: Message, ctx: CanvasRenderingContext2D) => {
+  console.log(`Received message from worker (type: ${msg.type})`);
+
+  switch (msg.type) {
+    case "update":
+      draw(msg.data, ctx);
+
+      break;
+    case "checkpoint":
+      break;
+  }
 };
 
 export const Canvas = () => {
+  const w = new ServerWorker();
+
   useEffect(() => {
-    const s = new WebSocket(SERVER_URL);
+    const ctx = (
+      document.querySelector("#canvas")! as HTMLCanvasElement
+    ).getContext("2d");
 
-    s.onclose = (_e) => {
-      console.error("The server has closed the connection.");
-    };
-
-    s.onmessage = (e: MessageEvent<string>) => {
-      let msg: Message;
-      try {
-        msg = JSON.parse(e.data);
-      } catch (e) {
-        console.error("Invalid JSON:", e);
-        return;
-      }
-
-      const canvas: HTMLCanvasElement = document.querySelector("#canvas")!;
-      const ctx = canvas.getContext("2d");
-      switch (msg.type) {
-        case "error":
-          console.error("Error from server:", msg.data);
-          break;
-        case "close":
-          // In the holy text of RFC 6455 section 5.5.1 (Close), the spec says that we
-          // should echo a Close frame back. However, there's not really a good reason
-          // for the server to close the WS connection, so we're going to assume that if
-          // we receive a Close frame, it's already an echo. Not the best way to do it,
-          // but it reduces the complexity at no real observable cost.
-          s.close();
-          break;
-        case "checkpoint":
-          console.log("Received checkpoint");
-          // TODO: add length check; this might help speed this up
-
-          // if this introduces lag, well idk
-          let incomingHash: string;
-          computeHash(msg.data.toString()).then((h) => (incomingHash = h));
-          let presentHash: string;
-          computeHash(state.toString()).then((h) => (presentHash = h));
-
-          if (incomingHash === presentHash) {
-            break;
-          }
-          console.log(
-            "Hashes of local and remote data don't match, restoring from checkpoint",
-          );
-          state = msg.data;
-          // TODO: maybe reset the canvas?
-          for (const stroke of state) {
-            draw(stroke, ctx);
-          }
-
-          break;
-        case "update":
-          console.log("Received an update:", msg.data);
-          draw(msg.data, ctx);
-
-          break;
-      }
-    };
-
-    s.onopen = (_e) => {
-      console.log("Server connected");
-    };
+    w.onmessage = (e: MessageEvent) => messageHandler(e.data, ctx);
   }, []);
 
   return (
     <canvas
       id="canvas"
       style="position: absolute; left: 0; top: 0; width: 100svw; height: 100svh;"
-    ></canvas>
+    />
   );
 };
