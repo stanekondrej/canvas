@@ -22,7 +22,7 @@ export type Message =
  */
 export type ControlMessage = "close";
 
-type Coordinate = {
+export type Coordinate = {
   x: number;
   y: number;
 };

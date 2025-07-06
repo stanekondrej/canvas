@@ -1,7 +1,8 @@
 import { useEffect } from "preact/hooks";
 import type { Stroke, Message, ControlMessage } from "./worker.ts";
 import ServerWorker from "./worker?worker";
-import { useLocation, useRoute } from "preact-iso";
+import { useLocation } from "preact-iso";
+import StrokeInputHandler from "./input_handler.ts";
 
 /**
  * Call this from a context where the canvas element has been initialized!
@@ -35,9 +36,29 @@ export const Canvas = () => {
 
   useEffect(() => {
     const w = new ServerWorker();
-    const ctx = (
-      document.querySelector("#canvas")! as HTMLCanvasElement
-    ).getContext("2d");
+    const canvas = document.querySelector("#canvas")! as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+
+    const inputHandler = new StrokeInputHandler();
+    let insideOfStroke = false;
+    canvas.addEventListener("mouseup", (e: MouseEvent) => {
+      if (e.button !== 0) return;
+
+      const s = inputHandler.finish();
+
+      // add code to send the finished stroke to the worker
+    })
+    canvas.addEventListener("mousedown", (e: MouseEvent) => {
+      if (e.button !== 0 /* e.g. the main button */) return;
+      insideOfStroke = true;
+
+      inputHandler.start()
+    })
+    canvas.addEventListener("mousemove", (e: MouseEvent) => {
+      if (!insideOfStroke) return;
+
+      inputHandler.add({ x: e.clientX, y: e.clientY })
+    })
 
     w.onmessage = (e: MessageEvent) => messageHandler(e.data, ctx);
 
