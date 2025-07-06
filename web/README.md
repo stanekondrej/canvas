@@ -1,15 +1,6 @@
-# `create-preact`
+# web - the web interface to Canvas
 
-<h2 align="center">
-  <img height="256" width="256" src="./src/assets/preact.svg">
-</h2>
+## Credit
 
-<h3 align="center">Get started using Preact and Vite!</h3>
-
-## Getting Started
-
--   `pnpm dev` - Starts a dev server at http://localhost:5173/
-
--   `pnpm build` - Builds for production, emitting to `dist/`. Prerenders all found routes in app to static HTML
-
--   `pnpm preview` - Starts a server at http://localhost:4173/ to test production build locally
+Some icons kindly provided by [SVGRepo](https://svgrepo.com) under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
