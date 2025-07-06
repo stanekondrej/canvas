@@ -30,9 +30,8 @@ const messageHandler = (msg: Message, ctx: CanvasRenderingContext2D) => {
 };
 
 export const Canvas = () => {
-  const w = new ServerWorker();
-
   useEffect(() => {
+    const w = new ServerWorker();
     const ctx = (
       document.querySelector("#canvas")! as HTMLCanvasElement
     ).getContext("2d");

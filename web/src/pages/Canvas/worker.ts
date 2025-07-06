@@ -35,7 +35,7 @@ const computeHash = async (x: string): Promise<string> => {
   return (await hash.digest()).toString();
 };
 
-const main = async () => {
+const main = () => {
   const s = new WebSocket(SERVER_URL);
 
   s.onclose = (_e) => {
@@ -98,4 +98,4 @@ const main = async () => {
   };
 };
 
-await main();
+main();
