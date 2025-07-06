@@ -35,14 +35,14 @@ const computeHash = async (x: string): Promise<string> => {
   return (await hash.digest()).toString();
 };
 
-const main = () => {
+const main = async () => {
   const s = new WebSocket(SERVER_URL);
 
   s.onclose = (_e) => {
     console.error("The server has closed the connection.");
   };
 
-  s.onmessage = (e: MessageEvent<string>) => {
+  s.onmessage = async (e: MessageEvent<string>) => {
     let msg: Message;
     try {
       msg = JSON.parse(e.data);
@@ -63,10 +63,8 @@ const main = () => {
         // we don't need to exactly check if each number matches. instead a cheap length
         // check may be more suitable
 
-        let incomingHash: string;
-        computeHash(msg.data.toString()).then((h) => (incomingHash = h));
-        let presentHash: string;
-        computeHash(state.toString()).then((h) => (presentHash = h));
+        const incomingHash: string = await computeHash(msg.data.toString());
+        const presentHash: string = await computeHash(state.toString());
 
         if (incomingHash === presentHash) {
           break;
@@ -100,4 +98,4 @@ const main = () => {
   };
 };
 
-main();
+await main();
