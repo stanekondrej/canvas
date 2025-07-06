@@ -23,8 +23,7 @@ jobs:
       # cache: 'npm' # work this out so that it uses pnpm
     - name: Install pnpm
       run: npm install -g pnpm
-    - run: cd web
     - name: Run tests
-      run: pnpm run test
+      run: cd web && pnpm run test
     - name: Build
-      run: pnpm run build
+      run: cd web && pnpm run build
