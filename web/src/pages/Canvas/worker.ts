@@ -58,8 +58,11 @@ const main = () => {
       case "checkpoint":
         console.log("Received checkpoint");
         // TODO: add length check; this might help speed this up
+        // on a similar note - this might not be necessary at all. i'm _pretty_ sure that
+        // websockets integrity-check the frames anyway (because its TCP) and therefore
+        // we don't need to exactly check if each number matches. instead a cheap length
+        // check may be more suitable
 
-        // if this introduces lag, well idk
         let incomingHash: string;
         computeHash(msg.data.toString()).then((h) => (incomingHash = h));
         let presentHash: string;
@@ -68,7 +71,7 @@ const main = () => {
         if (incomingHash === presentHash) {
           break;
         }
-        console.log(
+        console.warn(
           "Hashes of local and remote data don't match, restoring from checkpoint",
         );
         state = msg.data;
