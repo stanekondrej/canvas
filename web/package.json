@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-crypto/sha256-browser": "^5.2.0",
+    "@fontsource-variable/open-sans": "^5.2.6",
     "@tailwindcss/vite": "^4.1.11",
     "preact": "^10.25.3",
     "preact-iso": "^2.9.2",

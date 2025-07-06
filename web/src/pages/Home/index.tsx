@@ -1,6 +1,9 @@
+import "@fontsource-variable/open-sans";
+
 import { useLocation } from "preact-iso";
 import { useEffect } from "preact/hooks";
-import { Point } from "./Point";
+import { Point } from "./Point.tsx";
+import { Link } from "./Link.tsx";
 
 export function Home() {
   const { route } = useLocation();
@@ -38,9 +41,12 @@ export function Home() {
         <Point image="/bolt.svg" title="Real-time updates">
           Want to draw with a friend and create something together? That's easy
           with Canvas - using a lightweight communication mechanism (
-          <a href="https://websocket.org/guides/websocket-protocol/">
+          <Link
+            href="https://websocket.org/guides/websocket-protocol/"
+            target="_blank"
+          >
             WebSockets
-          </a>
+          </Link>
           ), your edits will be reflected globally in real-time while
           performance stays virtually unaffected.
         </Point>
@@ -55,13 +61,9 @@ export function Home() {
           Oh yeah totally. I am to be trusted. I also know everything about
           programming, and everything as a whole ackshually. (pls check this
           project out on{" "}
-          <a
-            target="_blank"
-            href="https://github.com/stanekondrej/canvas"
-            class="text-blue-700"
-          >
+          <Link href="https://github.com/stanekondrej/canvas" target="_blank">
             GitHub
-          </a>
+          </Link>
           )
         </Point>
       </div>
