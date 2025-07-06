@@ -1,5 +1,7 @@
 package canvas
 
+import "sync"
+
 type Coordinate struct {
 	X int `json:"x"`
 	Y int `json:"y"`
@@ -14,24 +16,49 @@ type Canvas struct {
 	// the current state of the canvas
 	strokes []Stroke
 
-	// functinos waiting for an update
-	observers []ObserverFunc
+	observerID     ID
+	observerIDLock sync.Mutex
+	// functions waiting for an update
+	observers map[ID]ObserverFunc
 }
 
 func NewCanvas() Canvas {
 	return Canvas{
 		strokes:   []Stroke{},
-		observers: []ObserverFunc{},
+		observers: make(map[ID]ObserverFunc),
 	}
+}
+
+func (c *Canvas) getObserverID() ID {
+	var id ID
+
+	c.observerIDLock.Lock()
+	id = c.observerID
+	c.observerID++
+	c.observerIDLock.Unlock()
+
+	return id
 }
 
 func (c *Canvas) CurrentState() []Stroke {
 	return c.strokes
 }
 
+// unique identifier
+type ID uint32
+
 // adds a new observer to the canvas, for getting updates.
-func (c *Canvas) RegisterObserver(o ObserverFunc) {
-	c.observers = append(c.observers, o)
+//
+// returns an ID that can be later used to deregister the observer.
+func (c *Canvas) RegisterObserver(o ObserverFunc) ID {
+	id := c.getObserverID()
+	c.observers[id] = o
+
+	return id
+}
+
+func (c *Canvas) UnregisterObserver(id ID) {
+	c.observers[id] = nil
 }
 
 // adds a stroke to the canvas
