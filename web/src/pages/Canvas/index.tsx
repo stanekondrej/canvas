@@ -39,10 +39,5 @@ export const Canvas = () => {
     w.onmessage = (e: MessageEvent) => messageHandler(e.data, ctx);
   }, []);
 
-  return (
-    <canvas
-      id="canvas"
-      style="position: absolute; left: 0; top: 0; width: 100svw; height: 100svh;"
-    />
-  );
+  return <canvas id="canvas" class="absolute left-0 top-0 w-screen h-screen" />;
 };
