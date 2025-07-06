@@ -4,6 +4,14 @@ I stumbled upon this idea not too long ago - a (more or less) global canvas that
 could draw on, _whatever*_ they like, and in real time, maybe even with friends if they
 want to.
 
+## todo list (roughly most to least important)
+
+- [ ] draw strokes received from the server on the client
+- [ ] the server leaks memory, because after connection closure, the goroutine that was
+  responsible for the connection doesn't terminate (kinda important lol)
+- [ ] implement erasing of strokes and stuff (not sure how)
+- [ ] prettier website
+
 ## technical nerdy stuff
 
 The project consists of a server and a client. A client is a web browser, the server is,
