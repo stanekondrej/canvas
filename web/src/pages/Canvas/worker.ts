@@ -18,6 +18,10 @@ export type Message =
       data: string;
     };
 
+/** This message can be received from the main "thread", e.g. the UI.
+ */
+export type ControlMessage = "close";
+
 type Coordinate = {
   x: number;
   y: number;
@@ -37,6 +41,16 @@ const computeHash = async (x: string): Promise<string> => {
 
 const main = () => {
   const s = new WebSocket(SERVER_URL);
+
+  onmessage = (e: MessageEvent<ControlMessage>) => {
+    switch (e.data) {
+      case "close":
+        console.log("received close request from UI");
+
+        s.close();
+        break;
+    }
+  };
 
   s.onclose = (_e) => {
     console.error("The server has closed the connection.");

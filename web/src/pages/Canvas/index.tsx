@@ -1,6 +1,7 @@
 import { useEffect } from "preact/hooks";
-import type { Stroke, Message } from "./worker.ts";
+import type { Stroke, Message, ControlMessage } from "./worker.ts";
 import ServerWorker from "./worker?worker";
+import { useLocation, useRoute } from "preact-iso";
 
 /**
  * Call this from a context where the canvas element has been initialized!
@@ -30,6 +31,8 @@ const messageHandler = (msg: Message, ctx: CanvasRenderingContext2D) => {
 };
 
 export const Canvas = () => {
+  const { route } = useLocation();
+
   useEffect(() => {
     const w = new ServerWorker();
     const ctx = (
@@ -37,6 +40,15 @@ export const Canvas = () => {
     ).getContext("2d");
 
     w.onmessage = (e: MessageEvent) => messageHandler(e.data, ctx);
+
+    addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key !== "Escape") {
+        return;
+      }
+
+      w.postMessage("close" satisfies ControlMessage);
+      route("/");
+    });
   }, []);
 
   return <canvas id="canvas" class="absolute left-0 top-0 w-screen h-screen" />;
