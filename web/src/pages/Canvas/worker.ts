@@ -14,10 +14,6 @@ export type Message =
       data: Stroke[];
     }
   | {
-      type: "close";
-      data: null;
-    }
-  | {
       type: "error";
       data: string;
     };
@@ -58,14 +54,6 @@ const main = () => {
     switch (msg.type) {
       case "error":
         console.error("Error from server:", msg.data);
-        break;
-      case "close":
-        // In the holy text of RFC 6455 section 5.5.1 (Close), the spec says that we
-        // should echo a Close frame back. However, there's not really a good reason
-        // for the server to close the WS connection, so we're going to assume that if
-        // we receive a Close frame, it's already an echo. Not the best way to do it,
-        // but it reduces the complexity at no real observable cost.
-        s.close();
         break;
       case "checkpoint":
         console.log("Received checkpoint");
