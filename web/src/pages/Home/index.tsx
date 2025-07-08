@@ -38,7 +38,7 @@ export function Home() {
       </div>
 
       <div class="grid grid-cols-3 min-w-[1000px] w-4/5 max-w-4/5">
-        <Point image="/bolt.svg" title="Real-time updates">
+        <Point image="/bolt.svg" title="Blazing fast">
           Want to draw with a friend and create something together? That's easy
           with Canvas - using a lightweight communication mechanism (
           <Link
