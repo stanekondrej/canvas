@@ -7,11 +7,9 @@ export default class StrokeInputHandler {
     this.#currentStroke = null;
   }
 
-  start() {
-    this.#currentStroke = [];
-  }
-
   add(coord: Coordinate) {
+    if (!this.#currentStroke) this.#currentStroke = [];
+
     this.#currentStroke.push(coord);
   }
 

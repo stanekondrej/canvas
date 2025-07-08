@@ -20,7 +20,15 @@ export type Message =
 
 /** This message can be received from the main "thread", e.g. the UI.
  */
-export type ControlMessage = "close";
+export type ControlMessage =
+  | {
+      type: "close";
+      data: null;
+    }
+  | {
+      type: "stroke";
+      data: Stroke;
+    };
 
 export type Coordinate = {
   x: number;
@@ -31,7 +39,6 @@ export type Stroke = Coordinate[];
 let state: Stroke[] = [];
 
 const SERVER_URL = "ws://localhost:9999";
-const TARGET_ORIGIN = "*";
 
 const computeHash = async (x: string): Promise<string> => {
   let hash = new Sha256();
@@ -43,17 +50,26 @@ const main = () => {
   const s = new WebSocket(SERVER_URL);
 
   onmessage = (e: MessageEvent<ControlMessage>) => {
-    switch (e.data) {
+    switch (e.data.type) {
       case "close":
         console.log("received close request from UI");
 
         s.close();
         break;
+      case "stroke":
+        console.log("received stroke message from UI");
+
+        s.send(
+          JSON.stringify({
+            type: "update",
+            data: e.data.data,
+          } satisfies Message),
+        );
     }
   };
 
-  s.onclose = (_e) => {
-    console.error("The server has closed the connection.");
+  s.onclose = (e) => {
+    console.error(`The server has closed the connection: ${e.reason}`);
   };
 
   s.onmessage = async (e: MessageEvent<string>) => {
@@ -87,21 +103,15 @@ const main = () => {
           "Hashes of local and remote data don't match, restoring from checkpoint",
         );
         state = msg.data;
-        postMessage(
-          {
-            type: "checkpoint",
-            data: state,
-          } satisfies Message,
-          TARGET_ORIGIN,
-        );
+        postMessage({
+          type: "checkpoint",
+          data: state,
+        } satisfies Message);
 
         break;
       case "update":
         console.log("Received an update:", msg.data);
-        postMessage(
-          { type: "update", data: msg.data } satisfies Message,
-          TARGET_ORIGIN,
-        );
+        postMessage({ type: "update", data: msg.data } satisfies Message);
 
         break;
     }

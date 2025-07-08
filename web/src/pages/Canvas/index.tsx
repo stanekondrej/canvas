@@ -43,16 +43,16 @@ export const Canvas = () => {
     let insideOfStroke = false;
     canvas.addEventListener("mouseup", (e: MouseEvent) => {
       if (e.button !== 0) return;
+      insideOfStroke = false;
 
       const s = inputHandler.finish();
 
-      // add code to send the finished stroke to the worker
+      w.postMessage({ type: "stroke", data: s } satisfies ControlMessage)
     })
     canvas.addEventListener("mousedown", (e: MouseEvent) => {
       if (e.button !== 0 /* e.g. the main button */) return;
       insideOfStroke = true;
-
-      inputHandler.start()
+      inputHandler.add({ x: e.clientX, y: e.clientY })
     })
     canvas.addEventListener("mousemove", (e: MouseEvent) => {
       if (!insideOfStroke) return;
@@ -67,7 +67,7 @@ export const Canvas = () => {
         return;
       }
 
-      w.postMessage("close" satisfies ControlMessage);
+      w.postMessage({ type: "close", data: null } satisfies ControlMessage);
       route("/");
     });
   }, []);

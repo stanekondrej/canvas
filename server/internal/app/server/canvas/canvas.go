@@ -14,7 +14,8 @@ type ObserverFunc func(s Stroke)
 
 type Canvas struct {
 	// the current state of the canvas
-	strokes []Stroke
+	strokeLock sync.Mutex
+	strokes    []Stroke
 
 	observerID     ID
 	observerIDLock sync.Mutex
@@ -63,12 +64,13 @@ func (c *Canvas) UnregisterObserver(id ID) {
 
 // adds a stroke to the canvas
 func (c *Canvas) AddStroke(s Stroke) {
-	// TODO: consider moving this inside the goroutine
+	c.strokeLock.Lock()
 	c.strokes = append(c.strokes, s)
+	c.strokeLock.Unlock()
 
 	go func() {
 		for _, observer := range c.observers {
-			go func() { observer(s) }()
+			go observer(s)
 		}
 	}()
 }
